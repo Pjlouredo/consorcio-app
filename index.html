@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consórcio entre Amigos</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #202124;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e88e5;
+            margin-bottom: 5px;
+            font-size: 26px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 20px;
+            margin-bottom: 12px;
+            border-radius: 24px;
+            border: 1px solid #dadce0;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: #1e88e5;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 24px;
+            background: #1e88e5;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1976d2;
+        }
+
+        .participant {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border: 1px solid #f1f3f4;
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 1px 3px 1px rgba(60, 64, 67, 0.05);
+            transition: box-shadow 0.2s;
+        }
+
+        .participant:hover {
+            box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.2), 0 4px 8px 3px rgba(60, 64, 67, 0.1);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .small-btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .paid {
+            background: #e6f4ea;
+            border-color: #ceead6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Consórcio Dona Cida</h1>
+        <h2>Pagamento todo dia 30</h2>
+
+        <div
+            style="background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(60,64,67,0.1); border: 1px solid #f1f3f4;">
+            <h3 style="margin-top: 0; font-size: 14px; color: #1e88e5; text-align: center;">Configurações Globais</h3>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 12px; color: #5f6368; display: block; margin-bottom: 5px;">Valor Inicial
+                        (R$)</label>
+                    <input id="baseValueInput" type="number" onchange="updateConfig()" value="200"
+                        style="margin-bottom: 0; border-radius: 12px; padding: 10px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 12px; color: #5f6368; display: block; margin-bottom: 5px;">Acréscimo/Mês
+                        (R$)</label>
+                    <input id="monthlyIncreaseInput" type="number" onchange="updateConfig()" value="5"
+                        style="margin-bottom: 0; border-radius: 12px; padding: 10px;">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input id="nameInput" placeholder="Nome do participante" style="flex: 2; margin-bottom: 0;">
+            <button onclick="addParticipant()" style="flex: 1; margin-bottom: 0;">Adicionar</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="sendGroupReminder()"
+                style="flex: 2; background: #25D366; font-weight: bold; padding: 12px; border: none; border-radius: 24px; color: white; font-size: 13px; cursor: pointer; margin-bottom: 0;">👥
+                Lembrete no Grupo</button>
+            <button onclick="showRules()"
+                style="flex: 1; background: #1e88e5; font-weight: bold; padding: 12px; border: none; border-radius: 24px; color: white; font-size: 13px; cursor: pointer; margin-bottom: 0;">📜
+                Regras</button>
+        </div>
+
+        <div id="list"></div>
+    </div>
+
+    <!-- Modal de Regras -->
+    <div id="rulesModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+        <div
+            style="background: #fff; padding: 25px; border-radius: 16px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; color: #1e88e5; font-size: 18px;">📜 Regras do Consórcio</h3>
+            <p style="color: #5f6368; font-size: 14px; line-height: 1.6; text-align: left; margin: 20px 0;">
+                • O pagamento é todo <strong>dia 30</strong>.<br><br>
+                • Terá juros de <strong>R$ 2,50 por dia de atraso</strong>.<br><br>
+                • Esse valor arrecadado com os juros será repassado integralmente para o <strong>contemplado do
+                    mês</strong>.
+            </p>
+            <button onclick="closeRules()"
+                style="background: #5f6368; width: 100%; padding: 12px; border: none; border-radius: 24px; color: white; font-weight: bold; margin-bottom: 0;">Entendi</button>
+        </div>
+    </div>
+
+    <script>
+        let config = JSON.parse(localStorage.getItem('consorcio_config')) || { baseValue: 200, monthlyIncrease: 5 };
+        let participants = JSON.parse(localStorage.getItem('consorcio')) || [];
+
+        // Inicializar UI Config
+        document.getElementById('baseValueInput').value = config.baseValue;
+        document.getElementById('monthlyIncreaseInput').value = config.monthlyIncrease;
+
+        function updateConfig() {
+            config.baseValue = parseFloat(document.getElementById('baseValueInput').value) || 0;
+            config.monthlyIncrease = parseFloat(document.getElementById('monthlyIncreaseInput').value) || 0;
+            localStorage.setItem('consorcio_config', JSON.stringify(config));
+            render();
+        }
+
+        // Migração de dados antigos
+        let needsSave = false;
+        participants.forEach(p => {
+            if (p.payments === undefined) {
+                p.payments = {};
+                p.received = false;
+                p.receivedMonth = null;
+                if (p.paidMonths > 0) {
+                    let d = new Date();
+                    d.setMonth(d.getMonth() - p.paidMonths);
+                    for (let i = 0; i < p.paidMonths; i++) {
+                        d.setMonth(d.getMonth() + 1);
+                        let mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                        p.payments[mStr] = true;
+                    }
+                }
+                needsSave = true;
+            }
+        });
+        if (needsSave) save();
+
+        function save() {
+            localStorage.setItem('consorcio', JSON.stringify(participants));
+        }
+
+        function getCurrentMonth() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        // Recupera o valor da parcela baseado no mês cronológico global
+        function getParcelValue(monthStr) {
+            const allMonthsSet = new Set();
+            participants.forEach(part => {
+                Object.keys(part.payments).forEach(m => allMonthsSet.add(m));
+                if (part.receivedMonth) allMonthsSet.add(part.receivedMonth);
+            });
+            const globalSortedMonths = Array.from(allMonthsSet).sort();
+            const mIndex = globalSortedMonths.indexOf(monthStr);
+            const indexToUse = mIndex >= 0 ? mIndex : 0;
+            return config.baseValue + (indexToUse * config.monthlyIncrease);
+        }
+
+        // Integração automática com Google Sheets
+        function enviarParaGoogle(dados) {
+            const url = 'https://script.google.com/macros/s/AKfycbwkwgJ6k43KtptedwTrj_2tTRhIT15inwJm1UuxpOcU4Zy0A1RLuX-uk-mz7XhGu1jh/exec';
+
+            const params = new URLSearchParams();
+            for (let key in dados) {
+                params.append(key, dados[key]);
+            }
+
+            fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            }).catch(e => {
+                // Falha silenciosa para funcionar offline sem quebrar o sistema
+                console.log('Envio offline ou erro:', e);
+            });
+        }
+
+        function addParticipant() {
+            const name = document.getElementById('nameInput').value;
+            if (!name) return;
+
+            participants.push({
+                name: name,
+                payments: {},
+                received: false,
+                receivedMonth: null,
+                expanded: false
+            });
+            document.getElementById('nameInput').value = '';
+            save();
+            render();
+
+            // Envia para o Google Sheets (participante adicionado)
+            enviarParaGoogle({
+                nome: name,
+                mes: getCurrentMonth(),
+                pago: false,
+                valor: 0,
+                recebeu: false
+            });
+        }
+
+        function registerPayment(index) {
+            const monthStr = document.getElementById(`monthInput_${index}`).value;
+            if (!monthStr) return;
+            if (participants[index].payments[monthStr]) {
+                alert('Pagamento para este mês já foi registrado.');
+                return;
+            }
+            participants[index].payments[monthStr] = true;
+            save();
+            render();
+
+            // Envia para o Google Sheets (pagamento registrado)
+            enviarParaGoogle({
+                nome: participants[index].name,
+                mes: monthStr,
+                pago: true,
+                valor: getParcelValue(monthStr),
+                recebeu: participants[index].received
+            });
+        }
+
+        function removePayment(index, monthStr) {
+            if (confirm(`Deseja remover o pagamento do mês ${monthStr}?`)) {
+                delete participants[index].payments[monthStr];
+                save();
+                render();
+            }
+        }
+
+        function editPayment(index, oldMonthStr) {
+            const newMonthStr = prompt("Edite o mês/ano do pagamento (formato AAAA-MM):", oldMonthStr);
+            if (newMonthStr && newMonthStr.trim() !== "" && newMonthStr !== oldMonthStr) {
+                if (participants[index].payments[newMonthStr]) {
+                    alert("Esse mês já está registrado para este participante.");
+                    return;
+                }
+                if (!/^\d{4}-\d{2}$/.test(newMonthStr)) {
+                    alert("Formato inválido. Use AAAA-MM (Ex: 2026-05).");
+                    return;
+                }
+                delete participants[index].payments[oldMonthStr];
+                participants[index].payments[newMonthStr] = true;
+                save();
+                render();
+            }
+        }
+
+        function sendGroupReminder() {
+            const msg = "Olá pessoal, tudo bem? Estou passando pra lembrar que a próxima parcela do consórcio é para o próximo dia 30.";
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function closeRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        function markAsReceived(index) {
+            const currentM = new Date().getMonth() + 1;
+            const m = prompt("Em qual mês o participante recebeu o consórcio? (Digite apenas o número, ex: 5 para Maio):", currentM);
+            if (m) {
+                const monthNum = parseInt(m, 10);
+                if (monthNum >= 1 && monthNum <= 12) {
+                    const currentYear = new Date().getFullYear();
+                    const formattedMonth = `${currentYear}-${String(monthNum).padStart(2, '0')}`;
+                    participants[index].received = true;
+                    participants[index].receivedMonth = formattedMonth;
+                    save();
+                    render();
+
+                    // Envia para o Google Sheets (marcado como recebido)
+                    enviarParaGoogle({
+                        nome: participants[index].name,
+                        mes: formattedMonth,
+                        pago: participants[index].payments[formattedMonth] ? true : false,
+                        valor: getParcelValue(formattedMonth),
+                        recebeu: true
+                    });
+                } else {
+                    alert("Mês inválido. Digite um número de 1 a 12.");
+                }
+            }
+        }
+
+        function unmarkAsReceived(index) {
+            participants[index].received = false;
+            participants[index].receivedMonth = null;
+            save();
+            render();
+        }
+
+        function removeParticipant(index) {
+            if (confirm(`Tem certeza que deseja remover ${participants[index].name}?`)) {
+                participants.splice(index, 1);
+                save();
+                render();
+            }
+        }
+
+        function editParticipant(index) {
+            const newName = prompt("Digite o novo nome para o participante:", participants[index].name);
+            if (newName && newName.trim() !== "") {
+                participants[index].name = newName.trim();
+                save();
+                render();
+            }
+        }
+
+        function toggleExpand(index) {
+            participants[index].expanded = !participants[index].expanded;
+            save();
+            render();
+        }
+
+        function getStatus(p) {
+            if (p.received) return { text: "Já Recebeu", color: "#1976d2", bg: "#e3f2fd" };
+
+            const currentMonthStr = getCurrentMonth();
+            if (p.payments[currentMonthStr]) {
+                return { text: "Em Dia", color: "#137333", bg: "#e6f4ea" };
+            } else {
+                return { text: "Pendente", color: "#b06000", bg: "#fef7e0" };
+            }
+        }
+
+        function sendWhats(index) {
+            const p = participants[index];
+            const name = p.name;
+            const monthNames = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const currentMonthNumber = parseInt(getCurrentMonth().split('-')[1], 10);
+            const monthName = monthNames[currentMonthNumber - 1];
+            const msg = `Olá ${name}, seu pagamento do consórcio do mês de ${monthName} foi confirmado! ✅`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        }
+
+        function render() {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+
+            const allMonthsSet = new Set();
+            participants.forEach(part => {
+                Object.keys(part.payments).forEach(m => allMonthsSet.add(m));
+                if (part.receivedMonth) allMonthsSet.add(part.receivedMonth);
+            });
+            const globalSortedMonths = Array.from(allMonthsSet).sort();
+
+            participants.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.className = 'participant';
+
+                const pStatus = getStatus(p);
+                const pCount = Object.keys(p.payments).length;
+
+                let totalPaid = 0;
+                Object.keys(p.payments).forEach(mStr => {
+                    const mIndex = globalSortedMonths.indexOf(mStr);
+                    const indexToUse = mIndex >= 0 ? mIndex : 0;
+                    totalPaid += config.baseValue + (indexToUse * config.monthlyIncrease);
+                });
+
+                let prizeHtml = '';
+                if (p.received && p.receivedMonth) {
+                    const monthIndex = globalSortedMonths.indexOf(p.receivedMonth);
+                    const indexToUse = monthIndex >= 0 ? monthIndex : 0;
+                    const monthValue = config.baseValue + (indexToUse * config.monthlyIncrease);
+                    const prizeValue = participants.length * monthValue;
+                    prizeHtml = `<div style="color: #1976d2; font-weight: bold; margin-top: 3px;">🏆 Recebeu: R$ ${prizeValue.toFixed(2).replace('.', ',')}</div>`;
+                }
+
+                div.style.borderLeft = `4px solid ${pStatus.color}`;
+
+                const sortedMonths = Object.keys(p.payments).sort();
+
+                div.innerHTML = `
+      <div class="row" onclick="toggleExpand(${i})" style="cursor: pointer; align-items: flex-start;">
+        <div>
+            <strong>${p.name} <span style="font-size: 12px; margin-left: 5px;">${p.expanded ? '▼' : '▶'}</span></strong>
+            <div style="font-size: 11px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                <div><span style="background: ${pStatus.bg}; color: ${pStatus.color}; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${pStatus.text}</span></div>
+                <div style="color: #5f6368; margin-top: 2px;">💰 Total Pago: R$ ${totalPaid.toFixed(2).replace('.', ',')}</div>
+                ${prizeHtml}
+            </div>
+        </div>
+        <div style="margin-top: 2px;">
+            <span style="font-size: 13px; color: #5f6368; font-weight: 500;">${pCount} pagamentos</span>
+        </div>
+      </div>
+      ${p.expanded ? `
+      <div style="margin-top: 10px; border-top: 1px solid #e0e0e0; padding-top: 15px;">
+          
+          <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+            <input type="month" id="monthInput_${i}" value="${getCurrentMonth()}" style="margin-bottom: 0; padding: 10px; border-radius: 12px; flex: 1;">
+            <button class="small-btn" onclick="registerPayment(${i})" style="margin-bottom: 0; background: #34a853; flex: 1; padding: 11px;">✔ Pago</button>
+          </div>
+
+          ${sortedMonths.length > 0 ?
+                            `<table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ddd; padding: 6px; background: #eee; text-align: left;">Mês</th>
+                        <th style="border: 1px solid #ddd; padding: 6px; background: #eee; text-align: center;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sortedMonths.map(monthStr => `
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 6px;">${monthStr.split('-')[1]}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center; white-space: nowrap;">
+                            <button class="small-btn" onclick="editPayment(${i}, '${monthStr}')" style="width: auto; padding: 4px 8px; font-size: 10px; margin: 0 4px 0 0; background: #ffb300; color: #000;">✏</button>
+                            <button class="small-btn" onclick="removePayment(${i}, '${monthStr}')" style="width: auto; padding: 4px 8px; font-size: 10px; margin: 0; background: #e53935; color: #fff;">🗑</button>
+                        </td>
+                    </tr>`).join('')}
+                </tbody>
+             </table>` : ''}
+          
+          <div class="btns" style="margin-bottom: 8px;">
+            ${!p.received ?
+                            `<button class="small-btn" onclick="markAsReceived(${i})" style="background: #1976d2;">🏆 Já Recebeu</button>` :
+                            `<button class="small-btn" onclick="unmarkAsReceived(${i})" style="background: #5f6368;">Desfazer Recebimento</button>`}
+            <button class="small-btn" onclick="sendWhats(${i})">💬 Enviar Recibo</button>
+          </div>
+          <div class="btns">
+            <button class="small-btn" onclick="editParticipant(${i})" style="background: #ffb300; color: #000;">✏ Editar</button>
+            <button class="small-btn" onclick="removeParticipant(${i})" style="background: #e53935;">🗑 Remover</button>
+          </div>
+      </div>` : ''}
+    `;
+
+                list.appendChild(div);
+            });
+        }
+
+        render();
+
+        // INTEGRAÇÃO GOOGLE (OPCIONAL)
+        // você precisa criar um Google Forms e colar o link aqui
+        function enviarParaGoogle(nome, mes, valor) {
+            fetch('COLE_SEU_LINK_DO_GOOGLE_FORMS_AQUI', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `entry.123456=${nome}&entry.654321=${mes}&entry.111111=${valor}`
+            });
+        }
+    </script>
+</body>
+
+</html>
